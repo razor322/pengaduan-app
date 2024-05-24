@@ -72,7 +72,7 @@ class _PengawasanListPageState extends State<PengawasanListPage> {
         isLoading = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(e.toString()),
+        content: Text("data laporan belum ada"),
       ));
     }
   }

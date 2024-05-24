@@ -2,13 +2,19 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_image_slideshow/flutter_image_slideshow.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:pengaduan_app/const.dart';
+import 'package:pengaduan_app/model/model_add_penilaian.dart';
 import 'package:pengaduan_app/screen/jms/jms_list_page.dart';
 import 'package:pengaduan_app/screen/korupsi/pengaduan_korupsi_list_page.dart';
 import 'package:pengaduan_app/screen/korupsi/pengaduan_korupsi_page.dart';
+import 'package:http/http.dart' as http;
+import 'package:pengaduan_app/screen/login.dart';
 import 'package:pengaduan_app/screen/pengaduan/pegawai/pegawai_list_page.dart';
 import 'package:pengaduan_app/screen/pengaduan/pengawasan/pengawasan_list_page.dart';
 import 'package:pengaduan_app/screen/pengaduan/penyuluhan_hukum/penyuluhan_hukum_list_page.dart';
 import 'package:pengaduan_app/screen/pengaduan/pilkada/pilkada_list_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -38,6 +44,64 @@ class _HomePageState extends State<HomePage> {
       "judul": "Posko Pilkada",
     }
   ];
+  final _formKey = GlobalKey<FormState>();
+  final _pesanController = TextEditingController();
+
+  String? id, username, email;
+
+  @override
+  void initState() {
+    super.initState();
+    getSession();
+  }
+
+  Future<void> getSession() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    setState(() {
+      id = pref.getString("id") ?? '';
+      username = pref.getString("username") ?? '';
+      email = pref.getString("email") ?? '';
+      print('id $id');
+      print('username $username');
+    });
+  }
+
+  Future<ModelAddPenilaian?> registerAccount(int ratingnilai) async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        var isLoading = true;
+      });
+      try {
+        http.Response res =
+            await http.post(Uri.parse('${url}addpenilaian.php'), body: {
+          "id_user": id,
+          "rating": ratingnilai.toString(),
+          "pesan": _pesanController.text,
+        });
+
+        final data = modelAddPenilaianFromJson(res.body);
+
+        if (data.isSuccess == true) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => LoginScreen()),
+            (route) => false,
+          );
+        }
+
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(data.message)));
+      } catch (e) {
+        print(e.toString());
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
+      } finally {
+        setState(() {
+          var isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,36 +119,69 @@ class _HomePageState extends State<HomePage> {
                 style: TextStyle(fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(5, (index) {
-                      return Icon(
-                        index < 4 ? Icons.star : Icons.star_border,
+              content: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    RatingBar.builder(
+                      initialRating: 3,
+                      minRating: 1,
+                      direction: Axis.horizontal,
+                      allowHalfRating: true,
+                      itemCount: 5,
+                      itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
+                      itemBuilder: (context, _) => Icon(
+                        Icons.star,
                         color: Colors.amber,
-                        size: 35,
-                      );
-                    }),
-                  ),
-                  SizedBox(height: 20),
-                  Container(
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20)),
-                    child: TextField(
-                      maxLines: 3,
-                      decoration: InputDecoration(
-                        fillColor: Colors.red,
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide.none,
+                      ),
+                      onRatingUpdate: (rating) {
+                        print(rating);
+                      },
+                    ),
+                    SizedBox(height: 20),
+                    Container(
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20)),
+                      child: TextFormField(
+                        controller: _pesanController,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Masukkan Pesan!';
+                          }
+                          return null;
+                        },
+                        maxLines: 3,
+                        decoration: InputDecoration(
+                          fillColor: Colors.red,
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                          ),
+                          hintText: 'Comment here...',
                         ),
-                        hintText: 'Comment here...',
                       ),
                     ),
-                  ),
-                ],
+                    SizedBox(height: 20),
+                    FilledButton.tonalIcon(
+                      onPressed: () {
+                        final rating = 3;
+                        if (_formKey.currentState?.validate() == true) {
+                          registerAccount(rating);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content:
+                                  Text("Silahkan isi data terlebih dahulu"),
+                            ),
+                          );
+                        }
+                      },
+                      icon: const Icon(Icons.send),
+                      label: const Text('Send'),
+                    ),
+                  ],
+                ),
               ),
             );
           },

@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:pengaduan_app/admin/screen/pengaduan/penyuluhan_hukum/penyuluhan_hukum_list_page.dart';
+import 'package:pengaduan_app/screen/pengaduan/penyuluhan_hukum/penyuluhan_hukum_list_page.dart';
 import 'package:pengaduan_app/const.dart';
 import 'package:pengaduan_app/model/pengaduan/model_list_pengaduan.dart';
 

@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:pengaduan_app/admin/screen/korupsi/pengaduan_korupsi_list_page.dart';
+import 'package:pengaduan_app/screen/korupsi/pengaduan_korupsi_list_page.dart';
 
 import 'package:pengaduan_app/const.dart';
 

@@ -73,7 +73,7 @@ class _PenyuluhanHukumListPageState extends State<PenyuluhanHukumListPage> {
         isLoading = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(e.toString()),
+        content: Text("data laporan belum ada"),
       ));
     }
   }

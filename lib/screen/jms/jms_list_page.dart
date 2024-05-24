@@ -71,7 +71,7 @@ class _JMSListPageState extends State<JMSListPage> {
         isLoading = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(e.toString()),
+        content: Text("data laporan belum ada"),
       ));
     }
   }
