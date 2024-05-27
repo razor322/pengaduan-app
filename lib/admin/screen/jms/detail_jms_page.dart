@@ -18,7 +18,7 @@ class DetailJMSPage extends StatelessWidget {
       BuildContext context, String idp, String status) async {
     try {
       http.Response res = await http.post(
-          Uri.parse('${url}updatepengaduanstatus.php'),
+          Uri.parse('${url}updatejmsstatus.php'),
           body: {"status": status, "id": idp});
 
       // Periksa apakah permintaan berhasil (status kode 200)
